@@ -1,0 +1,22 @@
+Questo programma consente di scaricare le puntate della trasmissione
+radiofonica "La storia in giallo" salvandole in formato MP3.
+
+Per compilare il programma su Linux basta usare make, mentre su Windows bisogna
+posizionarsi nella directory src/ ed eseguire build.cmd.
+
+Per la licenza del programma consultare licenza.txt, nella directory doc.
+
+Per alcune note ed informazioni su come contattare l'autore consultare 
+LEGGIMI.html, nella directory doc.
+
+Il contenuto delle directory è il seguente:
+
+  ./debian ->  file per la creazione di pacchetti Debian/Ubuntu
+  ./apps   ->  MPlayer e Lame per Windows
+  ./data   ->  file di supporto (es. icona e lista episodi)
+  ./doc    ->  licenze e README vari
+  ./nsis   ->  script per la creazione dell'installer con NSIS
+  ./src    ->  sorgenti C#, icona SVG e script vari
+  ./       ->  taglib-sharp.dll, Makefile e alcuni file di testo
+
+Enjoy!

@@ -1,0 +1,9 @@
+1.0.1 (25 dicembre 2009)
+------------------------
+    * Correzione aggiornamento lista episodi
+
+
+
+1.0 (26 novembre 2009)
+----------------------
+    * Rilascio iniziale

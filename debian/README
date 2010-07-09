@@ -1,0 +1,9 @@
+The Debian Package la-storia-in-giallo
+----------------------------
+
+This package allows you to download the episodes of La storia in giallo, an
+Italian transmission of Radio 3.
+
+It requires Mono and MPlayer.
+
+ -- Paolo Bernardi <villa.lobos@tiscali.it>  Mon, 05 Jul 2010 14:22:43 +0200
