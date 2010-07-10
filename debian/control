@@ -7,12 +7,10 @@ Standards-Version: 3.8.3
 Homepage: http://paolobernardi.wordpress.com/
 
 Package: la-storia-in-giallo
-Architecture: any
-Depends: libmono-winforms2.0-cil, mplayer
+Architecture: all
+Depends: libmono-winforms2.0-cil, mplayer, lame
 Description: download the episodes of "La storia in giallo" as MP3 files
  Questo programma consente di scaricare gli episodi della trasmissione
- radiofonica di Radio 3 "La storia in giallo" in formato MP3. Richiede
- mplayer, che è disponibile nei repository medibuntu.
+ radiofonica di Radio 3 "La storia in giallo" in formato MP3. 
  This program allows you to download the episodes of the Italian
- radio program "La storia in giallo" in MP3 format. It requires mplayer,
- which can be found on the medibuntu repository.
+ radio program "La storia in giallo" in MP3 format. 

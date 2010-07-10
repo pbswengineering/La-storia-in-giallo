@@ -7,7 +7,6 @@ EPISODES=episodes.txt
 DESKTOP=lstg.desktop
 SCRIPT=lstg
 TAGLIB=taglib-sharp.dll
-DESTDIR=/usr
 INSTALL_DIR=$(DESTDIR)/usr/bin
 SHARE_DIR=$(DESTDIR)/usr/share/lstg
 DESKTOP_DIR=$(DESTDIR)/usr/share/applications
@@ -21,7 +20,6 @@ clean:
 	rm -f src/$(EXE) $(EXE) *.tar.bz2
 
 install: $(EXE)
-	echo 'Installing...'
 	test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
 	test -d $(SHARE_DIR)/data || mkdir -p $(SHARE_DIR)/data
 	test -d $(DESKTOP_DIR) || mkdir -p $(DESKTOP_DIR)
