@@ -32,31 +32,14 @@ namespace LaStoriaInGiallo
 		private ProgressBar pgDownload;
 		private Label lbConvert;
 		private ProgressBar pgConvert;
-		
-		private Dictionary<string, string> idTrasmissione = new Dictionary<string, string>()
-		{
-			{ "La Storia in Giallo", "lstg" },
-			{ "Cuore di Tenebra - Dentro la storia", "cdtd" },
-			{ "Cuore di Tenebra - Oltre la storia", "cdto" }
-		};
 
-		private Dictionary<string, Crawler> crawlerTrasmissione = new Dictionary<string, Crawler>()
-		{
-			{ "lstg", new CrawlerLstg() },
-			{ "cdtd", new CrawlerCdtd() },
-			{ "cdto", new CrawlerCdto() }
-		};
-
-		private Dictionary<string, bool> updatedTrasmissione = new Dictionary<string, bool>()
-		{
-			{ "lstg", true }, // No need to update the episodes because it's over
-			{ "cdtd", false },
-			{ "cdto", false }
-		};
-
+		private TransmissionManager tm;
+		private Transmission transmission;
 		private EpisodeDB db;
 		private Crawler web;
 		private ExternalSoftware sw;
+
+		private Dictionary<string, bool> updatedTrasmissione = new Dictionary<string, bool>();
 		
 		private string tempDirectory;
 		private string mp3Directory;
@@ -67,13 +50,15 @@ namespace LaStoriaInGiallo
 		
 		public MainProgram()
 		{
+			tm = new TransmissionManager();
+			transmission = tm.DefaultTransmission;
 			exeDirectory = Path.GetDirectoryName(Application.ExecutablePath);
 			dataDirectory = Path.Combine(exeDirectory, "data");
 
 			canExit = false;
 			isExiting = false;
 		
-			web = new CrawlerLstg();
+			web = transmission.Crawler;
 			
 			if(!web.Internet())
 			{
@@ -82,13 +67,14 @@ namespace LaStoriaInGiallo
 				return;
 			}
 			
-			sw = new ExternalSoftware();
+			sw = new ExternalSoftware(transmission.MplayerEndsWithError);
 			
 			var appData = Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
 			configDirectory = Path.Combine(appData, "la_storia_in_giallo");
 			if (!Directory.Exists(configDirectory)) Directory.CreateDirectory(configDirectory);
 			
 			Text = "La storia in giallo";
+			Font = new Font("Tahoma", 8);
 			StartPosition = FormStartPosition.CenterScreen;
 			ClientSize = new Size(400, 600);
 			Icon = new Icon(Path.Combine(dataDirectory, "icon.ico"));
@@ -100,13 +86,13 @@ namespace LaStoriaInGiallo
 			Controls.Add(lbTrasmissione);
 
 			cbTrasmissione = new ComboBox();
-			foreach (string t in idTrasmissione.Keys) cbTrasmissione.Items.Add(t);
+			foreach (string t in tm.TransmissionNames) cbTrasmissione.Items.Add(t);
 			cbTrasmissione.DropDownStyle = ComboBoxStyle.DropDownList;
-			cbTrasmissione.SelectedValueChanged += delegate { ChangeTrasmissione(); };
+			cbTrasmissione.SelectedValueChanged += delegate { ChangeTransmission(); };
 			Controls.Add(cbTrasmissione);
 
 			lbSearch = new Label();
-			lbSearch.Text = "Titolo da cercare";
+			lbSearch.Text = "Cerca titolo";
 			Controls.Add(lbSearch);
 			
 			txSearch = new TextBox();
@@ -124,9 +110,7 @@ namespace LaStoriaInGiallo
 			btDownload = new Button();
 			btDownload.Text = "Scarica in formato MP3";
 			btDownload.Font = new Font("Times New Roman", 12, FontStyle.Bold | FontStyle.Italic);
-			btDownload.Click += delegate { 
-				new Thread(new ThreadStart(DownloadEpisode)).Start();
-			};
+			btDownload.Click += delegate { new Thread(new ThreadStart(DownloadEpisode)).Start(); };
 			Controls.Add(btDownload);
 			
 			// Bottom (continues...)
@@ -157,8 +141,10 @@ namespace LaStoriaInGiallo
 			cbTrasmissione.SelectedItem = "La Storia in Giallo";
 		}
 		
-		private void ChangeTrasmissione() {
-			var code = idTrasmissione[(string)cbTrasmissione.SelectedItem];
+		private void ChangeTransmission() {
+			var code = tm.TransmissionCode((string)cbTrasmissione.SelectedItem);
+			transmission = tm.Transmission(code);
+			sw = new ExternalSoftware(transmission.MplayerEndsWithError);
 
 			// Check if the episode list file is in place
 			episodesFile = Path.Combine(configDirectory, "episodes-" + code + ".txt");
@@ -174,6 +160,11 @@ namespace LaStoriaInGiallo
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.AddRange(db.GetRange());
 			
+			if (!updatedTrasmissione.ContainsKey(code))
+			{
+				updatedTrasmissione[code] = transmission.IsOver;
+			}
+
 			if (!updatedTrasmissione[code])
 			{
 				new Thread(new ThreadStart(UpdateEpisodes)).Start();
@@ -186,8 +177,8 @@ namespace LaStoriaInGiallo
 			var previousTitle = Text;
 			Text = "Aggiornamento lista episodi...";
 
-			var code = idTrasmissione[(string)cbTrasmissione.SelectedItem];
-			web = crawlerTrasmissione[code];
+			web = transmission.Crawler;
+
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.Add("Sto scaricando la lista degli episodi...");
 
@@ -205,7 +196,7 @@ namespace LaStoriaInGiallo
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.AddRange(db.GetRange());
 			Text = previousTitle;
-			updatedTrasmissione[code] = true;
+			updatedTrasmissione[transmission.Code] = true;
 			EnableControls(true);
 		}
 
@@ -326,7 +317,8 @@ namespace LaStoriaInGiallo
 				sw.ConvertToMP3(wav, mp3, new UpdateStatusDelegate(UpdateConvertStatus));
 				TagLib.File tag = TagLib.File.Create(mp3);
 				tag.Tag.Title = title;
-				tag.Tag.Performers = new string[] { trasmissione };
+				MessageBox.Show(transmission.Name);
+				tag.Tag.Performers = new string[] { transmission.Name };
 				tag.Save();
 				
 				File.Delete(wav);

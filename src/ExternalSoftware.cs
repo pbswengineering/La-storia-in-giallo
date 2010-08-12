@@ -30,7 +30,9 @@ namespace LaStoriaInGiallo
 		
 		private Process process;
 		
-		public ExternalSoftware()
+		private bool mplayerEndsWithError;
+		
+		public ExternalSoftware(bool mplayerEndsWithError)
 		{
 			if(System.Environment.OSVersion.VersionString.StartsWith("Unix"))
 			{
@@ -43,11 +45,12 @@ namespace LaStoriaInGiallo
 				mplayer = Path.Combine(Path.Combine(exeDirectory, "apps"), "mplayer.exe");
 				lame = Path.Combine(Path.Combine(exeDirectory, "apps"), "lame.exe");
 			}
-			
+		
+			this.mplayerEndsWithError = mplayerEndsWithError;
 			process = null;
 		}
 
-		private void RunAndUpdatePercentage(string program, string args, string workingDirectory, bool stdout, ExtractPercentageDelegate getPercentage, UpdateStatusDelegate update, string errorMessage)
+		private void RunAndUpdatePercentage(string program, string args, string workingDirectory, bool stdout, ExtractPercentageDelegate getPercentage, UpdateStatusDelegate update, string errorMessage, bool stopOnErrors)
 		{
 			var info = new ProcessStartInfo();			
 			info.FileName = program;
@@ -78,7 +81,7 @@ namespace LaStoriaInGiallo
 
 					update(100);
 					
-					if(process.ExitCode != 0)
+					if(stopOnErrors && process.ExitCode != 0)
 					{
 						throw new Exception(errorMessage);
 					}
@@ -130,7 +133,7 @@ namespace LaStoriaInGiallo
 			// Without -nocache it creates two processes, one being used for caching
 			var args = string.Format("\"{0}\" -ao pcm -ao pcm:file=\"{1}\" -vc dummy -vo null", rtspURL, f.Name);
 			bigWavFile = outFile;
-			RunAndUpdatePercentage(mplayer, args, f.Parent.FullName, true, ExtractPercentageMPlayer, update, "Si è verificato un errore durante lo scaricamento della puntata.");
+			RunAndUpdatePercentage(mplayer, args, f.Parent.FullName, true, ExtractPercentageMPlayer, update, "Si è verificato un errore durante lo scaricamento della puntata.", !mplayerEndsWithError);
 		}
 		
 		public void ConvertToMP3(string inFile, string outFile, UpdateStatusDelegate update)
@@ -141,7 +144,7 @@ namespace LaStoriaInGiallo
 			}
 			
 			var args = string.Format("\"{0}\" \"{1}\"", inFile, outFile);
-			RunAndUpdatePercentage(lame, args, ".", false, ExtractPercentageLame, update, "Si è verificato un errore durante la creazione del file MP3.");
+			RunAndUpdatePercentage(lame, args, ".", false, ExtractPercentageLame, update, "Si è verificato un errore durante la creazione del file MP3.", true);
 		}
 	}
 }
