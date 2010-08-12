@@ -21,8 +21,8 @@ namespace LaStoriaInGiallo
 		private string exeDirectory;
 		private string dataDirectory;
 
-		private Label lbTrasmissione;
-		private ComboBox cbTrasmissione;
+		private Label lbTrasmission;
+		private ComboBox cbTrasmission;
 		private Label lbSearch;
 		private Color txSearchBackground;
 		private TextBox txSearch;
@@ -39,7 +39,7 @@ namespace LaStoriaInGiallo
 		private Crawler web;
 		private ExternalSoftware sw;
 
-		private Dictionary<string, bool> updatedTrasmissione = new Dictionary<string, bool>();
+		private Dictionary<string, bool> updatedTrasmission = new Dictionary<string, bool>();
 		
 		private string tempDirectory;
 		private string mp3Directory;
@@ -81,15 +81,15 @@ namespace LaStoriaInGiallo
 			FormClosing += CheckClosing;
 			
 			// Top
-			lbTrasmissione = new Label();
-			lbTrasmissione.Text = "Trasmissione";
-			Controls.Add(lbTrasmissione);
+			lbTrasmission = new Label();
+			lbTrasmission.Text = "Trasmissione";
+			Controls.Add(lbTrasmission);
 
-			cbTrasmissione = new ComboBox();
-			foreach (string t in tm.TransmissionNames) cbTrasmissione.Items.Add(t);
-			cbTrasmissione.DropDownStyle = ComboBoxStyle.DropDownList;
-			cbTrasmissione.SelectedValueChanged += delegate { ChangeTransmission(); };
-			Controls.Add(cbTrasmissione);
+			cbTrasmission = new ComboBox();
+			foreach (string t in tm.TransmissionNames) cbTrasmission.Items.Add(t);
+			cbTrasmission.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbTrasmission.SelectedValueChanged += delegate { ChangeTransmission(); };
+			Controls.Add(cbTrasmission);
 
 			lbSearch = new Label();
 			lbSearch.Text = "Cerca titolo";
@@ -138,11 +138,11 @@ namespace LaStoriaInGiallo
 			EnableControls(true);
 		
 			// Initializes with the default radio program
-			cbTrasmissione.SelectedItem = "La Storia in Giallo";
+			cbTrasmission.SelectedItem = "La Storia in Giallo";
 		}
 		
 		private void ChangeTransmission() {
-			var code = tm.TransmissionCode((string)cbTrasmissione.SelectedItem);
+			var code = tm.TransmissionCode((string)cbTrasmission.SelectedItem);
 			transmission = tm.Transmission(code);
 			sw = new ExternalSoftware(transmission.MplayerEndsWithError);
 
@@ -160,12 +160,12 @@ namespace LaStoriaInGiallo
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.AddRange(db.GetRange());
 			
-			if (!updatedTrasmissione.ContainsKey(code))
+			if (!updatedTrasmission.ContainsKey(code))
 			{
-				updatedTrasmissione[code] = transmission.IsOver;
+				updatedTrasmission[code] = transmission.IsOver;
 			}
 
-			if (!updatedTrasmissione[code])
+			if (!updatedTrasmission[code])
 			{
 				new Thread(new ThreadStart(UpdateEpisodes)).Start();
 			}
@@ -196,7 +196,7 @@ namespace LaStoriaInGiallo
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.AddRange(db.GetRange());
 			Text = previousTitle;
-			updatedTrasmissione[transmission.Code] = true;
+			updatedTrasmission[transmission.Code] = true;
 			EnableControls(true);
 		}
 
@@ -206,13 +206,13 @@ namespace LaStoriaInGiallo
 			var labelWidth = 120;
 			var fullWidth = this.Width - border * 2 - SystemInformation.Border3DSize.Width * 4;
 	
-			lbTrasmissione.Location = new Point(border, border);
-			lbTrasmissione.Size = new Size(labelWidth - 30, 20);			
+			lbTrasmission.Location = new Point(border, border);
+			lbTrasmission.Size = new Size(labelWidth - 30, 20);			
 
-			cbTrasmissione.Location = new Point(labelWidth - 30 + border * 2, border);
-			cbTrasmissione.Size = new Size(fullWidth - labelWidth + 30 - border, 15);
+			cbTrasmission.Location = new Point(labelWidth - 30 + border * 2, border);
+			cbTrasmission.Size = new Size(fullWidth - labelWidth + 30 - border, 15);
 
-			lbSearch.Location = new Point(border, cbTrasmissione.Location.Y + cbTrasmissione.Size.Height + SystemInformation.Border3DSize.Height * 4);
+			lbSearch.Location = new Point(border, cbTrasmission.Location.Y + cbTrasmission.Size.Height + SystemInformation.Border3DSize.Height * 4);
 			lbSearch.Size = new Size(labelWidth - 30, 20);			
 
 			txSearch.Location = new Point(labelWidth - 30 + border * 2, lbSearch.Location.Y);
@@ -260,7 +260,7 @@ namespace LaStoriaInGiallo
 		private void EnableControls(bool enabled)
 		{
 			canExit = enabled;
-			cbTrasmissione.Enabled = enabled;
+			cbTrasmission.Enabled = enabled;
 			txSearch.Enabled = enabled;
 			btDownload.Enabled = enabled;
 			lsEpisodes.Enabled = enabled;
@@ -296,9 +296,9 @@ namespace LaStoriaInGiallo
 			try
 			{
 				var desktop = Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-				var trasmissione = (string)cbTrasmissione.SelectedItem;
+				var transmissionName = (string)cbTrasmission.SelectedItem;
 			
-				tempDirectory = Path.Combine(desktop, trasmissione);
+				tempDirectory = Path.Combine(desktop, transmissionName);
 				if (!Directory.Exists(tempDirectory)) Directory.CreateDirectory(tempDirectory);
 			
 				mp3Directory = tempDirectory;

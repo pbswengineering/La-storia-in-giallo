@@ -13,12 +13,12 @@ SHARE_DIR=$(DESTDIR)/usr/share/lstg
 DESKTOP_DIR=$(DESTDIR)/usr/share/applications
 
 $(EXE): $(SOURCES)
-	( cd src && \
-	gmcs -out:$(EXE) -target:winexe -win32icon:../data/icon.ico -r:../taglib-sharp.dll -r:System.Windows.Forms.dll -r:System.Drawing Main.cs Episode.cs EpisodeDB.cs Crawler.cs ExternalSoftware.cs )
+	gmcs -out:src/$(EXE) -target:winexe -win32icon:data/icon.ico -r:taglib-sharp.dll -r:System.Windows.Forms.dll -r:System.Drawing $(SOURCES)
 	cp src/lstg.exe .
 
 clean:
 	rm -f src/$(EXE) $(EXE) *.tar.bz2
+	find . -name *~ -exec rm {} \;
 
 install: $(EXE)
 	test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
