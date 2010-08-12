@@ -6,12 +6,13 @@ SVG=lstg.svg
 EPISODES=episodes.txt
 DESKTOP=lstg.desktop
 SCRIPT=lstg
+SOURCES=$(wildcard src/*.cs)
 TAGLIB=taglib-sharp.dll
 INSTALL_DIR=$(DESTDIR)/usr/bin
 SHARE_DIR=$(DESTDIR)/usr/share/lstg
 DESKTOP_DIR=$(DESTDIR)/usr/share/applications
 
-$(EXE):
+$(EXE): $(SOURCES)
 	( cd src && \
 	gmcs -out:$(EXE) -target:winexe -win32icon:../data/icon.ico -r:../taglib-sharp.dll -r:System.Windows.Forms.dll -r:System.Drawing Main.cs Episode.cs EpisodeDB.cs Crawler.cs ExternalSoftware.cs )
 	cp src/lstg.exe .

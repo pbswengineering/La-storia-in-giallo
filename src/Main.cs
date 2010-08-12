@@ -7,6 +7,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -16,6 +17,12 @@ namespace LaStoriaInGiallo
 {
 	class MainProgram: Form
 	{
+
+		private string exeDirectory;
+		private string dataDirectory;
+
+		private Label lbTrasmissione;
+		private ComboBox cbTrasmissione;
 		private Label lbSearch;
 		private Color txSearchBackground;
 		private TextBox txSearch;
@@ -26,6 +33,27 @@ namespace LaStoriaInGiallo
 		private Label lbConvert;
 		private ProgressBar pgConvert;
 		
+		private Dictionary<string, string> idTrasmissione = new Dictionary<string, string>()
+		{
+			{ "La Storia in Giallo", "lstg" },
+			{ "Cuore di Tenebra - Dentro la storia", "cdtd" },
+			{ "Cuore di Tenebra - Oltre la storia", "cdto" }
+		};
+
+		private Dictionary<string, Crawler> crawlerTrasmissione = new Dictionary<string, Crawler>()
+		{
+			{ "lstg", new CrawlerLstg() },
+			{ "cdtd", new CrawlerCdtd() },
+			{ "cdto", new CrawlerCdto() }
+		};
+
+		private Dictionary<string, bool> updatedTrasmissione = new Dictionary<string, bool>()
+		{
+			{ "lstg", true }, // No need to update the episodes because it's over
+			{ "cdtd", false },
+			{ "cdto", false }
+		};
+
 		private EpisodeDB db;
 		private Crawler web;
 		private ExternalSoftware sw;
@@ -39,10 +67,13 @@ namespace LaStoriaInGiallo
 		
 		public MainProgram()
 		{
+			exeDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+			dataDirectory = Path.Combine(exeDirectory, "data");
+
 			canExit = false;
 			isExiting = false;
 		
-			web = new Crawler();
+			web = new CrawlerLstg();
 			
 			if(!web.Internet())
 			{
@@ -53,27 +84,9 @@ namespace LaStoriaInGiallo
 			
 			sw = new ExternalSoftware();
 			
-			var desktop = Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);			
-			tempDirectory = Path.Combine(desktop, "La storia in giallo");
-			if (!Directory.Exists(tempDirectory)) Directory.CreateDirectory(tempDirectory);
-			
-			mp3Directory = tempDirectory;
-			if (!Directory.Exists(mp3Directory)) Directory.CreateDirectory(mp3Directory);
-			
 			var appData = Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
 			configDirectory = Path.Combine(appData, "la_storia_in_giallo");
-			if (!Directory.Exists(configDirectory)) Directory.CreateDirectory(configDirectory);			
-			
-			episodesFile = Path.Combine(configDirectory, "episodes.txt");
-			var exeDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-			var dataDirectory = Path.Combine(exeDirectory, "data");
-			if (!File.Exists(episodesFile))
-			{
-				var originalEpisodesFile = Path.Combine(dataDirectory, "episodes.txt");
-				File.Copy(originalEpisodesFile, episodesFile);
-			}
-			
-			Console.WriteLine();
+			if (!Directory.Exists(configDirectory)) Directory.CreateDirectory(configDirectory);
 			
 			Text = "La storia in giallo";
 			StartPosition = FormStartPosition.CenterScreen;
@@ -82,6 +95,16 @@ namespace LaStoriaInGiallo
 			FormClosing += CheckClosing;
 			
 			// Top
+			lbTrasmissione = new Label();
+			lbTrasmissione.Text = "Trasmissione";
+			Controls.Add(lbTrasmissione);
+
+			cbTrasmissione = new ComboBox();
+			foreach (string t in idTrasmissione.Keys) cbTrasmissione.Items.Add(t);
+			cbTrasmissione.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbTrasmissione.SelectedValueChanged += delegate { ChangeTrasmissione(); };
+			Controls.Add(cbTrasmissione);
+
 			lbSearch = new Label();
 			lbSearch.Text = "Titolo da cercare";
 			Controls.Add(lbSearch);
@@ -130,18 +153,44 @@ namespace LaStoriaInGiallo
 			ResizeControls();
 			EnableControls(true);
 		
-			db = new EpisodeDB(episodesFile);
-			lsEpisodes.Items.AddRange(db.GetRange());			
-			// No need to update the episodes list because the transmission is over
-			//new Thread(new ThreadStart(UpdateEpisodes)).Start();
+			// Initializes with the default radio program
+			cbTrasmissione.SelectedItem = "La Storia in Giallo";
 		}
 		
-		/*
+		private void ChangeTrasmissione() {
+			var code = idTrasmissione[(string)cbTrasmissione.SelectedItem];
+
+			// Check if the episode list file is in place
+			episodesFile = Path.Combine(configDirectory, "episodes-" + code + ".txt");
+			var exeDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+			var dataDirectory = Path.Combine(exeDirectory, "data");
+			if (!File.Exists(episodesFile))
+			{
+				var originalEpisodesFile = Path.Combine(dataDirectory, "episodes-" + code + ".txt");
+				File.Copy(originalEpisodesFile, episodesFile);
+			}
+
+			db = new EpisodeDB(episodesFile);
+			lsEpisodes.Items.Clear();
+			lsEpisodes.Items.AddRange(db.GetRange());
+			
+			if (!updatedTrasmissione[code])
+			{
+				new Thread(new ThreadStart(UpdateEpisodes)).Start();
+			}
+		}
+
 		private void UpdateEpisodes()
 		{
 			EnableControls(false);
 			var previousTitle = Text;
 			Text = "Aggiornamento lista episodi...";
+
+			var code = idTrasmissione[(string)cbTrasmissione.SelectedItem];
+			web = crawlerTrasmissione[code];
+			lsEpisodes.Items.Clear();
+			lsEpisodes.Items.Add("Sto scaricando la lista degli episodi...");
+
 			var count = 0;
 			var page = 1;
 			do
@@ -152,23 +201,30 @@ namespace LaStoriaInGiallo
 			}
 			while(count != 0);
 			db.WriteTo(episodesFile);
+
 			lsEpisodes.Items.Clear();
 			lsEpisodes.Items.AddRange(db.GetRange());
 			Text = previousTitle;
+			updatedTrasmissione[code] = true;
 			EnableControls(true);
 		}
-		*/
-		
+
 		private void ResizeControls()
 		{
 			var border = 20;
 			var labelWidth = 120;
 			var fullWidth = this.Width - border * 2 - SystemInformation.Border3DSize.Width * 4;
 	
-			lbSearch.Location = new Point(border, border);
+			lbTrasmissione.Location = new Point(border, border);
+			lbTrasmissione.Size = new Size(labelWidth - 30, 20);			
+
+			cbTrasmissione.Location = new Point(labelWidth - 30 + border * 2, border);
+			cbTrasmissione.Size = new Size(fullWidth - labelWidth + 30 - border, 15);
+
+			lbSearch.Location = new Point(border, cbTrasmissione.Location.Y + cbTrasmissione.Size.Height + SystemInformation.Border3DSize.Height * 4);
 			lbSearch.Size = new Size(labelWidth - 30, 20);			
 
-			txSearch.Location = new Point(labelWidth - 30 + border * 2, border);
+			txSearch.Location = new Point(labelWidth - 30 + border * 2, lbSearch.Location.Y);
 			txSearch.Size = new Size(fullWidth - labelWidth + 30 - border, 15);
 
 			btDownload.Location = new Point(border, this.Height - 70 - SystemInformation.Border3DSize.Height * 4);
@@ -213,6 +269,7 @@ namespace LaStoriaInGiallo
 		private void EnableControls(bool enabled)
 		{
 			canExit = enabled;
+			cbTrasmissione.Enabled = enabled;
 			txSearch.Enabled = enabled;
 			btDownload.Enabled = enabled;
 			lsEpisodes.Enabled = enabled;
@@ -247,6 +304,14 @@ namespace LaStoriaInGiallo
 		{
 			try
 			{
+				var desktop = Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+				var trasmissione = (string)cbTrasmissione.SelectedItem;
+			
+				tempDirectory = Path.Combine(desktop, trasmissione);
+				if (!Directory.Exists(tempDirectory)) Directory.CreateDirectory(tempDirectory);
+			
+				mp3Directory = tempDirectory;
+				if (!Directory.Exists(mp3Directory)) Directory.CreateDirectory(mp3Directory);
 				Episode selection = (Episode)lsEpisodes.SelectedItem;
 				var title = selection.Title;
 				
@@ -261,7 +326,7 @@ namespace LaStoriaInGiallo
 				sw.ConvertToMP3(wav, mp3, new UpdateStatusDelegate(UpdateConvertStatus));
 				TagLib.File tag = TagLib.File.Create(mp3);
 				tag.Tag.Title = title;
-				tag.Tag.Performers = new string[] {"La storia in giallo"};
+				tag.Tag.Performers = new string[] { trasmissione };
 				tag.Save();
 				
 				File.Delete(wav);

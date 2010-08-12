@@ -1,3 +1,9 @@
+2.0 (12 agosto 2010)
+--------------------
+    * Aggiunto il supporto per Cuore di Tenebra (dentro e oltre la storia)
+
+
+
 1.0.1 (25 dicembre 2009)
 ------------------------
     * Correzione aggiornamento lista episodi

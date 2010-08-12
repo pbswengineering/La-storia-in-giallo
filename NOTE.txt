@@ -1,5 +1,8 @@
-Questo programma consente di scaricare le puntate della trasmissione
-radiofonica "La storia in giallo" salvandole in formato MP3.
+Questo programma consente di scaricare le puntate di alcune trasmissioni
+radiofoniche salvandole in formato MP3. Tali trasmissioni sono:
+   - La Storia in Giallo
+   - Cuore di Tenebra - Dentro la storia
+   - Cuore di Tenebra - Oltre la storia
 
 Per compilare il programma su Linux basta usare make, mentre su Windows bisogna
 posizionarsi nella directory src/ ed eseguire build.cmd.
