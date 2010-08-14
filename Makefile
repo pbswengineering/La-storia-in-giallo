@@ -3,7 +3,6 @@
 EXE=lstg.exe
 ICON=icon.ico
 SVG=lstg.svg
-EPISODES=episodes.txt
 DESKTOP=lstg.desktop
 SCRIPT=lstg
 SOURCES=$(wildcard src/*.cs)
@@ -29,7 +28,7 @@ install: $(EXE)
 	cp -f $(TAGLIB) $(SHARE_DIR)/
 	cp -f data/$(ICON) $(SHARE_DIR)/data/
 	cp -f data/$(SVG) $(SHARE_DIR)/data/
-	cp -f data/$(EPISODES) $(SHARE_DIR)/data/
+	cp -f $(wildcard data/episodes-*.txt) $(SHARE_DIR)/data/
 	cp -f data/$(DESKTOP) $(DESKTOP_DIR)/
 	update-desktop-database || true
 
