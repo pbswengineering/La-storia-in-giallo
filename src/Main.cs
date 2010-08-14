@@ -317,7 +317,6 @@ namespace LaStoriaInGiallo
 				sw.ConvertToMP3(wav, mp3, new UpdateStatusDelegate(UpdateConvertStatus));
 				TagLib.File tag = TagLib.File.Create(mp3);
 				tag.Tag.Title = title;
-				MessageBox.Show(transmission.Name);
 				tag.Tag.Performers = new string[] { transmission.Name };
 				tag.Save();
 				
