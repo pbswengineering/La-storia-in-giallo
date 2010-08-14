@@ -336,7 +336,7 @@ namespace LaStoriaInGiallo
 				{
 					pgDownload.Value = 0;
 					pgConvert.Value = 0;
-					MessageBox.Show("Si è verificato un errore: " + e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
 			finally
