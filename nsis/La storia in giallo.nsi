@@ -25,7 +25,9 @@ Section ""
 	
 	CreateDirectory "$INSTDIR\data"
 	SetOutPath "$INSTDIR\data"
-	File "..\data\episodes.txt"
+	File "..\data\episodes-lstg.txt"
+	File "..\data\episodes-cdtd.txt"
+	File "..\data\episodes-cdto.txt"
 	File "..\data\icon.ico"
 
 	CreateDirectory "$INSTDIR\apps"
@@ -39,7 +41,6 @@ Section ""
 	File "..\doc\lame-license.txt"
 	File "..\doc\mplayer-license.txt"
 	File "..\doc\taglib-sharp-license.txt"
-	File "..\doc\leggimi.html"
 
 	CreateDirectory "$SMPROGRAMS\La storia in giallo"
 	CreateShortCut "$SMPROGRAMS\La storia in giallo\Disinstalla.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
