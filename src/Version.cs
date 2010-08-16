@@ -29,9 +29,12 @@ namespace LaStoriaInGiallo
         	                        web.Headers["User-Agent"] = Crawler.DEFAULT_USER_AGENT;
 	                                text = web.DownloadString(URL).Trim();
                 	        }
-				// Now text is something like "2.0 http://pippo.com"
+				// Now text is something like "20 http://pippo.com"
+				// The version is multiplied by 10 to avoid localization problems
+				// (e.g. in my Italian Windows the floating point numbers use commas,
+				// in my English Linux systems they use the dot)
 				var parts = text.Split('\n')[0].Split(' ');
-				var lastVersion = Convert.ToDouble(parts[0]);
+				var lastVersion = Convert.ToDouble(parts[0]) / 10;
 				var lastVersionUrl = parts[1];
 				if (lastVersion > CURRENT_VERSION)
 				{
