@@ -171,6 +171,21 @@ namespace LaStoriaInGiallo
 			}
 		}
 
+		private void CheckUpdates()
+		{
+                        EnableControls(false);
+                        var previousTitle = Text;
+                        Text = "Controllo aggiornamenti disponibili...";
+
+                        lsEpisodes.Items.Clear();
+                        lsEpisodes.Items.Add("Sto controllando se ci sono aggiornamenti del programma...");
+			lsEpisodes.Refresh();
+			new Version().Check();
+
+		        Text = previousTitle;
+                        EnableControls(true);	
+		}
+
 		private void UpdateEpisodes()
 		{
 			EnableControls(false);
@@ -255,6 +270,7 @@ namespace LaStoriaInGiallo
 				}
 			}*/
 			e.Cancel = !canExit;
+			CheckUpdates();
 		}
 		
 		private void EnableControls(bool enabled)
