@@ -31,8 +31,7 @@ namespace LaStoriaInGiallo
                 	        }
 				// Now text is something like "2.0 http://pippo.com"
 				var parts = text.Split('\n')[0].Split(' ');
-				var versionParts = parts[0].Split('.');
-				var lastVersion = Convert.ToDouble(versionParts[0]);
+				var lastVersion = Convert.ToDouble(parts[0]);
 				var lastVersionUrl = parts[1];
 				if (lastVersion > CURRENT_VERSION)
 				{
