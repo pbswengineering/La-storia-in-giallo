@@ -9,8 +9,8 @@ Homepage: http://paolobernardi.wordpress.com/
 Package: la-storia-in-giallo
 Architecture: all
 Depends: libmono-winforms2.0-cil, mplayer, lame
-Description: download the episodes of "La storia in giallo" as MP3 files
+Description: download the episodes of "La storia in giallo" and other programs as MP3 files
  Questo programma consente di scaricare gli episodi della trasmissione
- radiofonica di Radio 3 "La storia in giallo" in formato MP3. 
+ radiofonica di Radio 3 "La storia in giallo" e "Cuore di tenebra" in formato MP3. 
  This program allows you to download the episodes of the Italian
- radio program "La storia in giallo" in MP3 format. 
+ radio programs "La storia in giallo" and "Cuore di tenebra" in MP3 format. 
