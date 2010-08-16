@@ -270,7 +270,7 @@ namespace LaStoriaInGiallo
 				}
 			}*/
 			e.Cancel = !canExit;
-			CheckUpdates();
+			if (canExit) CheckUpdates();
 		}
 		
 		private void EnableControls(bool enabled)
